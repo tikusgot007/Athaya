@@ -6,8 +6,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
@@ -85,8 +83,14 @@ fun NotaScreen(onBack: () -> Unit) {
             Text("Tambah Item")
         }
 
-        LazyColumn(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
-            items(items) { item ->
+        // Plain forEach, not LazyColumn: this Column is already inside an
+        // outer Column.verticalScroll() for the whole nota form, and a
+        // LazyColumn nested inside a scrollable Column gets infinite height
+        // constraints from its parent, which crashes at composition time
+        // (same root cause as the PrinterSettingsScreen crash fix). The
+        // item list here is always small, so a lazy list buys nothing.
+        Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
+            items.forEach { item ->
                 Text("${item.name} x${item.quantity} = ${item.subtotal}")
             }
         }
