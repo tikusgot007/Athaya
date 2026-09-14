@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
 import com.athaya.printer.model.AddressData
+import com.athaya.printer.printer.PrintableWidthExceededException
 import com.athaya.printer.printer.PrinterProfile
 
 /**

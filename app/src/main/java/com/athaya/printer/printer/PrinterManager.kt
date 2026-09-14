@@ -21,8 +21,12 @@ data class DiscoveredPrinter(
  *
  * Implementations (BluetoothPrinter, UsbPrinter, LanPrinter) own the
  * connection details only. They never contain rendering or layout logic —
- * they receive an already-rendered, already-rotated, already-monochrome
- * Bitmap and are responsible only for ESC/POS encoding + transport.
+ * they receive an already-rendered, already-rotated Bitmap straight from a
+ * PrintRenderer. Internally, printBitmap() is expected to call
+ * com.athaya.printer.escpos.EscPosEncoder.encode(bitmap, profile) to get the
+ * monochrome/ESC-POS byte stream, then write those bytes to the transport —
+ * renderers must never import escpos, and PrinterManager implementations
+ * must never build ESC/POS commands by hand.
  */
 interface PrinterManager {
     val connectionType: ConnectionType

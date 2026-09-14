@@ -2,6 +2,7 @@ package com.athaya.printer.renderer
 
 import com.athaya.printer.model.NotaData
 import com.athaya.printer.model.NotaItem
+import com.athaya.printer.printer.PrintableWidthExceededException
 import com.athaya.printer.printer.PrinterProfile
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue

@@ -35,6 +35,16 @@ data class PrinterProfile(
 
     /** Active transport for this profile. */
     val connectionType: ConnectionType,
+
+    /**
+     * Whether this printer accepts an ESC/POS cut command (GS V). Some
+     * cheap thermal printers/mechanisms have no cutter at all; sending a
+     * cut command to one can be ignored or can error out depending on
+     * firmware. EscPosEncoder must never emit a cut command when this is
+     * false — it is not something to assume "probably fine" for a given
+     * printer without confirming.
+     */
+    val supportsCut: Boolean,
 ) {
     companion object {
         /**
@@ -49,6 +59,7 @@ data class PrinterProfile(
             dpi = 203,
             printableDots = 384,
             connectionType = ConnectionType.BLUETOOTH,
+            supportsCut = true,
         )
 
         /**
@@ -61,6 +72,7 @@ data class PrinterProfile(
             dpi = 203,
             printableDots = 576,
             connectionType = ConnectionType.BLUETOOTH,
+            supportsCut = true,
         )
     }
 }

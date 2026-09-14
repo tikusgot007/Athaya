@@ -17,7 +17,12 @@ bukan Compose capture), `mmToPx()`, rotasi nota 90°, template test 58mm
 template production, preview nyata di NotaScreen & AddressScreen, dan unit
 test (`MmToPxTest`, `NotaRendererTest`, `AddressRendererTest`).
 
-ESC/POS encoder (Phase 4) dan koneksi Bluetooth (Phase 5) menyusul.
+**Phase 4 selesai**: validasi renderer (dimensi bitmap aktual, rotasi
+100×60→60×100mm, tidak ada distorsi/kehilangan pixel, printable width
+tidak pernah melebihi `printableDots`), lalu `MonochromeConverter`
+(threshold configurable), `EscPosCommands`, dan `EscPosEncoder`
+(bit-packing raster `GS v 0`, feed, cut kondisional lewat
+`PrinterProfile.supportsCut`). Bluetooth (Phase 5) menyusul.
 
 > **Catatan lingkungan build**: di sandbox development ini, `dl.google.com`
 > (host Maven Google yang menyediakan Android Gradle Plugin & seluruh
@@ -42,8 +47,8 @@ com.athaya.printer/
   ui/         Layar Compose (Home, Nota, Address, Printer Settings)
   model/      Data class murni (NotaData, NotaItem, AddressData)
   renderer/   PrintRenderer<T> + mmToPx() — sumber kebenaran ukuran fisik
-  printer/    PrinterProfile + PrinterManager abstraction
-  escpos/     Encoder ESC/POS (Phase 4)
+  printer/    PrinterProfile + PrinterManager abstraction + shared exceptions
+  escpos/     MonochromeConverter + EscPosCommands + EscPosEncoder
   settings/   PrinterProfileStore (in-memory, tanpa DB)
 ```
 
