@@ -9,9 +9,22 @@ input → preview → print.
 
 **Phase 1 selesai**: struktur project, package layout, data model,
 `PrinterProfile` abstraction, dan UI dasar (Home, Nota, Address,
-Printer Settings) sudah ada. Rendering bitmap (Phase 2), rotasi nota
-(Phase 3), ESC/POS encoder (Phase 4), dan koneksi Bluetooth (Phase 5)
-menyusul secara bertahap.
+Printer Settings).
+
+**Phase 2 selesai**: `NotaRenderer` dan `AddressRenderer` (Bitmap/Canvas/Paint,
+bukan Compose capture), `mmToPx()`, rotasi nota 90°, template test 58mm
+(`NotaTemplateSpec.TEST_58MM`, `AddressTemplateSpec.TEST_58MM`) terpisah dari
+template production, preview nyata di NotaScreen & AddressScreen, dan unit
+test (`MmToPxTest`, `NotaRendererTest`, `AddressRendererTest`).
+
+ESC/POS encoder (Phase 4) dan koneksi Bluetooth (Phase 5) menyusul.
+
+> **Catatan lingkungan build**: di sandbox development ini, `dl.google.com`
+> (host Maven Google yang menyediakan Android Gradle Plugin & seluruh
+> artifact AndroidX) diblokir oleh kebijakan jaringan sandbox, sehingga
+> `gradle`/`gradlew` tidak bisa menyelesaikan resolusi dependency di sini.
+> Build & unit test (termasuk Robolectric-based renderer test) perlu
+> dijalankan di Android Studio atau CI dengan akses jaringan normal.
 
 ## Membuka project
 

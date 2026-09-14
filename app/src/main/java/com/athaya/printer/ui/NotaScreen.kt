@@ -1,14 +1,18 @@
 package com.athaya.printer.ui
 
-import androidx.compose.foundation.layout.Arrangement
+import android.graphics.Bitmap
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -16,18 +20,24 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.unit.dp
+import com.athaya.printer.model.NotaData
 import com.athaya.printer.model.NotaItem
+import com.athaya.printer.renderer.NotaRenderer
+import com.athaya.printer.renderer.NotaTemplateSpec
+import com.athaya.printer.settings.PrinterProfileStore
 
 /**
- * Nota input screen. Holds all fields purely in Compose remember state
- * (in-memory only, no persistence). Preview + actual bitmap rendering via
- * NotaRenderer, and the CETAK button wiring to PrinterManager, are added
- * in later phases (Phase 2 and Phase 5) per the staged MVP plan.
+ * Nota input screen. Fields are held purely in Compose remember state
+ * (in-memory only, no persistence). Preview renders a real Bitmap via
+ * NotaRenderer — the exact same renderer that will later feed the
+ * monochrome/ESC-POS pipeline — so preview and print never drift apart.
+ * The CETAK button stays a placeholder until Phase 5 wires PrinterManager.
  */
 @Composable
 fun NotaScreen(onBack: () -> Unit) {
-    var storeName by remember { mutableStateOf("") }
+    var storeName by remember { mutableStateOf("Toko Athaya") }
     var invoiceNumber by remember { mutableStateOf("") }
     var date by remember { mutableStateOf("") }
     var customerName by remember { mutableStateOf("") }
@@ -39,7 +49,18 @@ fun NotaScreen(onBack: () -> Unit) {
     var itemQty by remember { mutableStateOf("1") }
     var itemPrice by remember { mutableStateOf("0") }
 
-    Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+    var useTestTemplate by remember { mutableStateOf(true) }
+    var previewBitmap by remember { mutableStateOf<Bitmap?>(null) }
+    var previewError by remember { mutableStateOf<String?>(null) }
+
+    val notaRenderer = remember { NotaRenderer() }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(16.dp),
+    ) {
         Text("Cetak Nota")
 
         OutlinedTextField(value = storeName, onValueChange = { storeName = it }, label = { Text("Nama Toko") }, modifier = Modifier.fillMaxWidth())
@@ -78,14 +99,55 @@ fun NotaScreen(onBack: () -> Unit) {
         Text("Subtotal: $subtotal")
         Text("Total: $total")
 
-        Button(onClick = { /* Preview: implemented in Phase 2 with NotaRenderer */ }, modifier = Modifier.fillMaxWidth()) {
+        Text("Template rendering:")
+        Row(checked = useTestTemplate, label = "Test 58mm (rotate -> 56x100mm)") { useTestTemplate = true }
+        Row(checked = !useTestTemplate, label = "Production (rotate -> 60x100mm)") { useTestTemplate = false }
+
+        Button(
+            onClick = {
+                val data = NotaData(
+                    storeName = storeName,
+                    invoiceNumber = invoiceNumber,
+                    date = date,
+                    customerName = customerName,
+                    items = items,
+                    discount = discount.toLongOrNull() ?: 0L,
+                    note = note,
+                )
+                val template = if (useTestTemplate) NotaTemplateSpec.TEST_58MM else NotaTemplateSpec.PRODUCTION
+                val profile = PrinterProfileStore.getActiveProfile()
+                previewError = null
+                previewBitmap = try {
+                    notaRenderer.renderWithTemplate(data, profile, template)
+                } catch (e: IllegalStateException) {
+                    previewError = e.message
+                    null
+                }
+            },
+            modifier = Modifier.fillMaxWidth(),
+        ) {
             Text("Preview")
         }
+
+        previewError?.let { Text("Error: $it") }
+        previewBitmap?.let { bmp ->
+            Text("Preview (${bmp.width}x${bmp.height}px):")
+            Image(bitmap = bmp.asImageBitmap(), contentDescription = "Preview nota")
+        }
+
         Button(onClick = { /* Print: implemented in Phase 5 with PrinterManager */ }, modifier = Modifier.fillMaxWidth()) {
             Text("CETAK")
         }
         Button(onClick = onBack, modifier = Modifier.fillMaxWidth()) {
             Text("Kembali")
         }
+    }
+}
+
+@Composable
+private fun Row(checked: Boolean, label: String, onClick: () -> Unit) {
+    androidx.compose.foundation.layout.Row {
+        RadioButton(selected = checked, onClick = onClick)
+        Text(label, modifier = Modifier.padding(top = 12.dp))
     }
 }
