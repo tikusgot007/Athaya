@@ -7,8 +7,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
@@ -117,8 +115,14 @@ fun PrinterSettingsScreen(onBack: () -> Unit) {
             Text("Muat daftar printer (paired)")
         }
 
-        LazyColumn(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
-            items(pairedDevices) { device ->
+        // Plain forEach, not LazyColumn: this Column is already inside an
+        // outer Column.verticalScroll() for the whole settings page, and a
+        // LazyColumn nested inside a scrollable Column gets infinite height
+        // constraints from its parent, which crashes at runtime (see
+        // "PrinterSettingsScreen crash" bug report). The paired-device list
+        // is always small, so a lazy list buys nothing here anyway.
+        Column(modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)) {
+            pairedDevices.forEach { device ->
                 Row {
                     RadioButton(selected = selectedDevice == device, onClick = { selectedDevice = device })
                     Text("${device.name} (${device.address})", modifier = Modifier.padding(top = 12.dp))
