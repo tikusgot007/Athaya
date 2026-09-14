@@ -66,7 +66,7 @@ class NotaRendererTest {
             "printable width ${bitmap.width} must not exceed profile.printableDots ${profile.printableDots}",
             bitmap.width <= profile.printableDots,
         )
-        assertEquals(mmToPx(56f, profile.dpi), bitmap.width)
+        assertEquals(mmToPx(46f, profile.dpi), bitmap.width)
         assertEquals(mmToPx(100f, profile.dpi), bitmap.height)
     }
 

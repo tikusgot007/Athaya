@@ -104,7 +104,7 @@ fun NotaScreen(onBack: () -> Unit) {
         Text("Total: $total")
 
         Text("Template rendering:")
-        Row(checked = useTestTemplate, label = "Test 58mm (rotate -> 56x100mm)") { useTestTemplate = true }
+        Row(checked = useTestTemplate, label = "Test 58mm (rotate -> 46x100mm)") { useTestTemplate = true }
         Row(checked = !useTestTemplate, label = "Production (rotate -> 60x100mm)") { useTestTemplate = false }
 
         Button(

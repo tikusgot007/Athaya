@@ -30,7 +30,7 @@ class AddressRendererTest {
         val profile = PrinterProfile.test58mm()
         val bitmap = renderer.renderWithTemplate(sampleData(), profile, AddressTemplateSpec.TEST_58MM)
 
-        assertEquals(mmToPx(56f, profile.dpi), bitmap.width)
+        assertEquals(mmToPx(46f, profile.dpi), bitmap.width)
         assertTrue(
             "printable width ${bitmap.width} must not exceed profile.printableDots ${profile.printableDots}",
             bitmap.width <= profile.printableDots,

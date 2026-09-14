@@ -64,7 +64,7 @@ fun AddressScreen(onBack: () -> Unit) {
         Text("Template rendering:")
         Row {
             RadioButton(selected = useTestTemplate, onClick = { useTestTemplate = true })
-            Text("Test 58mm (56x100mm)", modifier = Modifier.padding(top = 12.dp))
+            Text("Test 58mm (46x100mm)", modifier = Modifier.padding(top = 12.dp))
         }
         Row {
             RadioButton(selected = !useTestTemplate, onClick = { useTestTemplate = false })

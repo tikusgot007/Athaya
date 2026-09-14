@@ -129,7 +129,7 @@ Belum dijalankan — dokumentasi langkah manual untuk saat ada device + printer 
 5. Tekan Connect, tunggu status berubah jadi "Terhubung ke ...".
 6. Tekan Test Print, verifikasi struk test keluar dari printer.
 7. Ganti ke NotaScreen, isi data nota, preview dengan template Test 58mm
-   (56×100mm setelah rotasi), lalu cetak — verifikasi lewat PrinterSettingsScreen
+   (46×100mm setelah rotasi), lalu cetak — verifikasi lewat PrinterSettingsScreen
    yang sudah connect (alur cetak nota nyata menyusul saat CETAK di
    NotaScreen/AddressScreen di-wire ke PrinterManager).
 8. Ulangi untuk AddressScreen dengan template Test 58mm.
