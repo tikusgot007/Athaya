@@ -1,12 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- Bluetooth permissions (MVP transport). USB/LAN added later without touching renderer. -->
+    <!--
+      Bluetooth Classic/RFCOMM permissions only (MVP transport, see
+      BluetoothPrinter). USB/LAN added later without touching renderer.
+
+      BLUETOOTH_SCAN and ACCESS_FINE_LOCATION are deliberately NOT
+      requested: this app only ever connects to devices already paired
+      from Android's own Bluetooth settings (bonded devices) and never
+      starts active discovery, so those permissions would be unused.
+    -->
     <uses-permission android:name="android.permission.BLUETOOTH" android:maxSdkVersion="30" />
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" android:maxSdkVersion="30" />
     <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
-    <uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
     <uses-feature android:name="android.hardware.bluetooth" android:required="false" />
     <uses-feature android:name="android.hardware.usb.host" android:required="false" />
