@@ -136,6 +136,38 @@ class EscPosEncoderBitPackingTest {
         assertTrue(containsSubsequence(bytes, EscPosCommands.CUT_FULL))
     }
 
+    @Test
+    fun `encodeMonochrome omits cut command when caller does not request it, even if the profile supports cutting`() {
+        val mono = MonochromeBitmap(width = 8, height = 1, blackPixels = BooleanArray(8))
+        // supportsCut = true, but cut = false: must NOT cut. Covers the
+        // "capable but not requested" case distinct from "not capable".
+        val bytes = EscPosEncoder.encodeMonochrome(mono, testProfile().copy(supportsCut = true), cut = false)
+
+        assertFalse(containsSubsequence(bytes, EscPosCommands.CUT_FULL))
+    }
+
+    @Test
+    fun `GS v 0 raster command is produced through the pluggable RasterImageEncoder, not hard-wired inline`() {
+        // Confirms EscPosEncoder.encodeMonochrome() goes through the
+        // RasterImageEncoder abstraction rather than only ever being able
+        // to emit GS v 0 inline -- so a future alternative (e.g. GS ( L)
+        // can be plugged in later without touching this call site.
+        val mono = MonochromeBitmap(width = 8, height = 1, blackPixels = BooleanArray(8) { true })
+        var encodeCalls = 0
+        val spyEncoder = object : RasterImageEncoder {
+            override fun encode(mono: MonochromeBitmap): ByteArray {
+                encodeCalls++
+                return byteArrayOf(0x7E) // arbitrary marker, distinct from GS v 0's 0x1D
+            }
+        }
+
+        val bytes = EscPosEncoder.encodeMonochrome(mono, testProfile(), rasterImageEncoder = spyEncoder)
+
+        assertEquals(1, encodeCalls)
+        assertTrue(containsSubsequence(bytes, byteArrayOf(0x7E)))
+        assertFalse(containsSubsequence(bytes, byteArrayOf(0x1D, 0x76, 0x30)))
+    }
+
     private fun containsSubsequence(haystack: ByteArray, needle: ByteArray): Boolean {
         if (needle.isEmpty() || needle.size > haystack.size) return false
         outer@ for (start in 0..haystack.size - needle.size) {

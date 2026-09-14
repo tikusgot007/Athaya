@@ -35,6 +35,7 @@ object EscPosEncoder {
         align: PrintAlign = PrintAlign.CENTER,
         feedLines: Int = 3,
         cut: Boolean = true,
+        rasterImageEncoder: RasterImageEncoder = GsV0RasterImageEncoder,
     ): ByteArray {
         if (bitmap.width > profile.printableDots) {
             throw PrintableWidthExceededException(
@@ -45,7 +46,7 @@ object EscPosEncoder {
         }
 
         val mono = MonochromeConverter.convert(bitmap, threshold)
-        return encodeMonochrome(mono, profile, align, feedLines, cut)
+        return encodeMonochrome(mono, profile, align, feedLines, cut, rasterImageEncoder)
     }
 
     /**
@@ -60,6 +61,7 @@ object EscPosEncoder {
         align: PrintAlign = PrintAlign.CENTER,
         feedLines: Int = 3,
         cut: Boolean = true,
+        rasterImageEncoder: RasterImageEncoder = GsV0RasterImageEncoder,
     ): ByteArray {
         if (mono.width > profile.printableDots) {
             throw PrintableWidthExceededException(
@@ -72,7 +74,7 @@ object EscPosEncoder {
         val out = ByteArrayOutputStream()
         out.write(EscPosCommands.INITIALIZE)
         out.write(EscPosCommands.align(align))
-        out.write(buildRasterCommand(mono))
+        out.write(rasterImageEncoder.encode(mono))
         out.write(EscPosCommands.feed(feedLines))
         if (cut && profile.supportsCut) {
             out.write(EscPosCommands.CUT_FULL)

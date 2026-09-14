@@ -17,12 +17,16 @@ bukan Compose capture), `mmToPx()`, rotasi nota 90°, template test 58mm
 template production, preview nyata di NotaScreen & AddressScreen, dan unit
 test (`MmToPxTest`, `NotaRendererTest`, `AddressRendererTest`).
 
-**Phase 4 selesai**: validasi renderer (dimensi bitmap aktual, rotasi
-100×60→60×100mm, tidak ada distorsi/kehilangan pixel, printable width
-tidak pernah melebihi `printableDots`), lalu `MonochromeConverter`
-(threshold configurable), `EscPosCommands`, dan `EscPosEncoder`
-(bit-packing raster `GS v 0`, feed, cut kondisional lewat
-`PrinterProfile.supportsCut`). Bluetooth (Phase 5) menyusul.
+**Phase 4 selesai** (+ review kecil): validasi renderer (dimensi bitmap
+aktual, rotasi 100×60→60×100mm, tidak ada distorsi/kehilangan pixel,
+printable width tidak pernah melebihi `printableDots`), lalu
+`MonochromeConverter` (threshold configurable), `EscPosCommands`, dan
+`EscPosEncoder` (bit-packing raster `GS v 0` lewat `RasterImageEncoder`
+yang pluggable — GS v 0 bukan satu-satunya raster command yang mungkin
+nanti — feed, cut kondisional lewat `PrinterProfile.supportsCut`).
+`printableDots` selalu dikonfigurasi terpisah dari `paperWidthMm`, tidak
+pernah dihitung otomatis dari `paperWidthMm × dpi`. Bluetooth (Phase 5)
+menyusul.
 
 > **Catatan lingkungan build**: di sandbox development ini, `dl.google.com`
 > (host Maven Google yang menyediakan Android Gradle Plugin & seluruh

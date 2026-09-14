@@ -27,9 +27,14 @@ data class PrinterProfile(
     val dpi: Int,
 
     /**
-     * Maximum printable width in dots (pixels) for this printer. Usually
-     * slightly less than the full paperWidthMm converted to dots because of
-     * physical, non-printable margins on either side of the print head.
+     * Maximum printable width in dots (pixels) that this printer's raster
+     * mode actually accepts. This is a separate, independently configured
+     * value from paperWidthMm — it is NEVER computed automatically as
+     * mmToPx(paperWidthMm, dpi), because the print head's real printable
+     * area is normally narrower than the full paper width (non-printable
+     * margins on either side) and that margin varies per printer model.
+     * Always set this from the printer's actual documented/measured raster
+     * width, not derived silently from paper size.
      */
     val printableDots: Int,
 
@@ -49,9 +54,9 @@ data class PrinterProfile(
     companion object {
         /**
          * Development/testing profile: the 58 mm thermal printer currently
-         * available. printableDots for a typical 58mm/203dpi head is ~384 dots;
-         * kept slightly conservative here and still fully derived, never
-         * hard-coded elsewhere.
+         * available. printableDots=384 is set directly from this printer's
+         * documented raster width, NOT computed from paperWidthMm x dpi
+         * (mmToPx(58, 203) would be ~463 — a different, unrelated number).
          */
         fun test58mm(): PrinterProfile = PrinterProfile(
             printerName = "Test Printer 58mm",
@@ -64,7 +69,8 @@ data class PrinterProfile(
 
         /**
          * Production profile: Iware XS-80, 80 mm thermal printer.
-         * Typical printable width for an 80mm/203dpi head is 576 dots.
+         * printableDots=576 is this printer's documented raster width, set
+         * independently of paperWidthMm — same rule as test58mm() above.
          */
         fun productionIwareXs80(): PrinterProfile = PrinterProfile(
             printerName = "Iware XS-80",
