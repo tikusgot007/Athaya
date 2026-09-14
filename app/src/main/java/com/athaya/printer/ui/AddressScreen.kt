@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import com.athaya.printer.model.AddressData
 import com.athaya.printer.renderer.AddressRenderer
 import com.athaya.printer.renderer.AddressTemplateSpec
+import com.athaya.printer.renderer.mmToPx
 import com.athaya.printer.settings.PrinterProfileStore
 
 /**
@@ -71,6 +72,23 @@ fun AddressScreen(onBack: () -> Unit) {
             Text("Production (80x100mm)", modifier = Modifier.padding(top = 12.dp))
         }
 
+        // Same informational check as NotaScreen: re-evaluated every
+        // recomposition so a mismatch between the selected template and the
+        // currently active printer profile is visible before Preview is
+        // even tapped. Never auto-scales anything -- renderWithTemplate()
+        // below still does the real, authoritative check.
+        val activeProfile = PrinterProfileStore.getActiveProfile()
+        val selectedTemplate = if (useTestTemplate) AddressTemplateSpec.TEST_58MM else AddressTemplateSpec.PRODUCTION
+        val requiredWidthPx = mmToPx(selectedTemplate.widthMm, activeProfile.dpi)
+        if (requiredWidthPx > activeProfile.printableDots) {
+            Text(
+                "⚠ Template \"${selectedTemplate.label}\" butuh ${requiredWidthPx}px, " +
+                    "melebihi printableDots=${activeProfile.printableDots} pada profile aktif " +
+                    "\"${activeProfile.printerName}\". Preview/Cetak akan gagal kecuali Anda ganti " +
+                    "profile printer di Pengaturan Printer, atau pilih template yang sesuai.",
+            )
+        }
+
         Button(
             onClick = {
                 val data = AddressData(
@@ -81,11 +99,9 @@ fun AddressScreen(onBack: () -> Unit) {
                     postalCode = postalCode,
                     note = note,
                 )
-                val template = if (useTestTemplate) AddressTemplateSpec.TEST_58MM else AddressTemplateSpec.PRODUCTION
-                val profile = PrinterProfileStore.getActiveProfile()
                 previewError = null
                 previewBitmap = try {
-                    addressRenderer.renderWithTemplate(data, profile, template)
+                    addressRenderer.renderWithTemplate(data, activeProfile, selectedTemplate)
                 } catch (e: IllegalStateException) {
                     previewError = e.message
                     null

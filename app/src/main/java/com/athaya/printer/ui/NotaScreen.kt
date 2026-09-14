@@ -24,6 +24,7 @@ import com.athaya.printer.model.NotaData
 import com.athaya.printer.model.NotaItem
 import com.athaya.printer.renderer.NotaRenderer
 import com.athaya.printer.renderer.NotaTemplateSpec
+import com.athaya.printer.renderer.mmToPx
 import com.athaya.printer.settings.PrinterProfileStore
 
 /**
@@ -107,6 +108,25 @@ fun NotaScreen(onBack: () -> Unit) {
         Row(checked = useTestTemplate, label = "Test 58mm (rotate -> 46x100mm)") { useTestTemplate = true }
         Row(checked = !useTestTemplate, label = "Production (rotate -> 60x100mm)") { useTestTemplate = false }
 
+        // Active profile/template compatibility is re-checked on every
+        // recomposition (e.g. after coming back from Pengaturan Printer
+        // with a different profile selected) so the mismatch is visible
+        // BEFORE the user hits Preview and gets a raw exception message.
+        // This is informational only -- it never auto-scales anything;
+        // renderWithTemplate() below still does the real, authoritative
+        // check and still throws if the mismatch is ignored.
+        val activeProfile = PrinterProfileStore.getActiveProfile()
+        val selectedTemplate = if (useTestTemplate) NotaTemplateSpec.TEST_58MM else NotaTemplateSpec.PRODUCTION
+        val requiredWidthPx = mmToPx(selectedTemplate.rotatedWidthMm, activeProfile.dpi)
+        if (requiredWidthPx > activeProfile.printableDots) {
+            Text(
+                "⚠ Template \"${selectedTemplate.label}\" butuh ${requiredWidthPx}px setelah rotasi, " +
+                    "melebihi printableDots=${activeProfile.printableDots} pada profile aktif " +
+                    "\"${activeProfile.printerName}\". Preview/Cetak akan gagal kecuali Anda ganti " +
+                    "profile printer di Pengaturan Printer, atau pilih template yang sesuai.",
+            )
+        }
+
         Button(
             onClick = {
                 val data = NotaData(
@@ -118,11 +138,9 @@ fun NotaScreen(onBack: () -> Unit) {
                     discount = discount.toLongOrNull() ?: 0L,
                     note = note,
                 )
-                val template = if (useTestTemplate) NotaTemplateSpec.TEST_58MM else NotaTemplateSpec.PRODUCTION
-                val profile = PrinterProfileStore.getActiveProfile()
                 previewError = null
                 previewBitmap = try {
-                    notaRenderer.renderWithTemplate(data, profile, template)
+                    notaRenderer.renderWithTemplate(data, activeProfile, selectedTemplate)
                 } catch (e: IllegalStateException) {
                     previewError = e.message
                     null
